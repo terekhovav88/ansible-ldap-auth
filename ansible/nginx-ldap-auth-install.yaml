@@ -1,0 +1,44 @@
+---
+- name:
+  hosts: all
+  become: yes
+  vars:
+    dest_dir_script: /usr/local/bin/
+    dest_dir_service: /etc/systemd/system/
+    dest_dir_logrotate: /etc/logrotate.d/
+    locations: ansible/tmp/nexus/package/conf/config/nginx/locations.conf
+    locations_dir: /etc/nginx/default.d
+    static_content: ansible/tmp/nexus/package/pl/logger_bundle.zip
+    content_dir: /usr/share/nginx/html/ulogger
+
+  tasks:
+    - name: Copy daemon script
+      copy:
+        src: files/nginx-ldap-daemon.py
+        dest: "{{dest_dir_script}}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy service
+      copy:
+        src: files/nginx-ldap-auth.service
+        dest: "{{dest_dir_service}}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy logrotate
+      copy:
+        src: files/nginx-ldap-auth.logrotate
+        dest: "{{dest_dir_service}}"
+        owner: root
+        group: root
+        mode: 0644
+
+
+    - name: Restart service ldap, in all cases
+      service:
+        name: nginx
+        daemon_reload: yes
+        state: started
